@@ -1,32 +1,32 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Hex game</title>
-    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+    <title>Hexed!</title>
     <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
     <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-    <script src="hexed.js"></script>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,400,300,600' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
     <link rel="stylesheet" type="text/css" href="homework2.css">
   </head>
   <body>
-    <h1>Hexed!</h1>
+    <h1>Hexed! - A jQuery Game</h1>
     <div id="swatch"></div>
     <div id="input_container">
       <div id="input_red">
-        <span class="slider"></span>
-        <span class="in_box"><input type="text" name="red_in" /></span>
+        <div class="slider" id="slider_red"></div>
+        <div class="in_box"><input type="text" id="red_in" value="127" /></div>
       </div>
       <div id="input_green">
-        <span class="slider"></span>
-        <span class="in_box"><input type="text" name="green_in" /></span>
+        <div class="slider" id="slider_green"></div>
+        <div class="in_box"><input type="text" id="green_in" value="127" /></div>
       </div>
       <div id="input_blue">
-        <span class="slider"></span>
-        <span class="in_box"><input type="text" name="blue_in" /></span>
+        <div class="slider" id="slider_blue"></div>
+        <div class="in_box"><input type="text" id="blue_in" value="127" /></div>
       </div>
     </div>
     <div id="message"></div>
     <button>Got it!</button>
+    <script src="hexed.js"></script>
   </body>
 </html>
