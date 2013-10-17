@@ -16,7 +16,7 @@ div:not(.slider) {
   margin:0;
 }
 
-#swatch {
+.swatch {
   width: 120px;
   height: 100px;
   background-image:none;
