@@ -14,6 +14,7 @@
         color += letters[Math.round(Math.random() * 15)];
     }
     $("#first_swatch").css("background-color",color);
+    return color;
   }
   function refreshValues() {
     var r = $("#slider_red").slider("value");
@@ -39,6 +40,7 @@
       change: refreshValues
     });
   });
+  fs_color = generateColor();
   $("#red_in").keyup(function() {
     $("#slider_red").slider("value",$(this).val())
   });
@@ -48,6 +50,20 @@
   $("#blue_in").keyup(function() {
     $("#slider_blue").slider("value",$(this).val())
   });
-  generateColor();
+  $("#check").click(function(){
+    var red = parseInt(fs_color.substr(1,2),16),
+      s_red = $("#red_in").attr("value");
+    var green = parseInt(fs_color.substr(3,2),16),
+      s_green = $("#green_in").attr("value");
+    var blue = parseInt(fs_color.substr(5,2),16),
+      s_blue = $("#blue_in").attr("value");
+    if (s_red != red) { var percent_red = ((red - s_red) / red) * 100; }
+    else { var percent_red = 0.00; }
+    if (s_green != green) { var percent_green = ((green - s_green) / green) * 100; }
+    else { var percent_green = 0.00; }
+    if (s_blue != blue) { var percent_blue = ((blue - s_blue) / blue) * 100; }
+    else { var percent_blue = 0.00; }
+    $("#message").html("Percent Error: R: " + percent_red.toFixed(2) + " G: " + percent_green.toFixed(2) + " B: " + percent_blue.toFixed(2));
+  });
+  
 }( jQuery ));
-
