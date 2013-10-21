@@ -223,7 +223,7 @@ $.fn.hexed = function(settings) {
           score_avg = 0;
         total_score += score_avg;
         // Switch over the visual displays
-        $("#overallscorebox").html(score_avg);
+        $("#overallscorebox").html(total_score);
         // Give the user a save form
         giveUserSaveForm();
         game_on = false;
