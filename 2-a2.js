@@ -199,7 +199,7 @@ $.fn.hexed = function(settings) {
         refreshValues();
         $("#message").html("");
         // Let the user know what the scores are
-        $("#overallscorebox").html(score_total);
+        $("#overallscorebox").html(total_score);
       }
       
       // Inform the user how many turns are left
