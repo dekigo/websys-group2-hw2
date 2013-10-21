@@ -15,17 +15,19 @@
  */
 
 /*
-  Be sure to include the jQuery API at the beginning of your HTML!
+  Be sure to include a link to the jQuery API (as well as this plugin) at the beginning of your HTML!
 */
 
 (function( $ ) {
   var difficulty;
   var max_turns;
+  var max_seconds;
   var turn;
   var fs_color;
   function setupGame() {
     difficulty = 5;
-    max_turns = 3;
+    max_turns = 10;
+    max_seconds = 20000;
     turn = 0;
     var header = '<title>Hexed!</title>';
     header += '<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>';
@@ -37,7 +39,8 @@
     setup += '<h3>Instructions:</h3><div id="instructions">';
     setup += '<div>Your goal is to guess the RGB values of the swatch on the left using the sliders and the swatch on the right.</div>';
     setup += '<div>Use the sliders or the input boxes to adjust the RGB values of the swatch on the right.</div>';
-    setup += '<div>Press the "Got it!" button when you think you have the correct answer.</div></div><br />';
+    setup += '<div>Press the "Got it!" button when you think you have the correct answer.</div>';
+    setup += '<div>You have a maximum of ' + max_turns + ' turns.</div></div><br />';
     setup += '<div id="swatch_container"><div id="first_swatch" class="swatch"></div>';
     setup += '<div id="second_swatch" class="swatch"></div></div>';
     setup += '<div id="input_container"><div id="input_red">';
@@ -100,8 +103,11 @@
   $("#blue_in").keyup(function() {
     $("#slider_blue").slider("value",$(this).val());
   });
+  var date = new Date();
+  var time_begin = date.getTime();
   /* Input Guess to Check Function */
-  $("#check").click(function(){    if (turn == max_turns) {
+  $("#check").click(function(){
+    if (turn == max_turns) {
       turn = 0;
       turns = max_turns;
       fs_color = generateColor();
@@ -110,11 +116,11 @@
     } else {
       turn++;
       var red = parseInt(fs_color.substr(1,2),16),
-        s_red = $("#red_in").attr("value");
+          s_red = $("#red_in").attr("value");
       var green = parseInt(fs_color.substr(3,2),16),
-        s_green = $("#green_in").attr("value");
+          s_green = $("#green_in").attr("value");
       var blue = parseInt(fs_color.substr(5,2),16),
-        s_blue = $("#blue_in").attr("value");
+          s_blue = $("#blue_in").attr("value");
       if (s_red != red) { var percent_red = (Math.abs(red - s_red) / 255) * 100; }
       else { var percent_red = 0.00; }
       if (s_green != green) { var percent_green = (Math.abs(green - s_green) / 255) * 100; }
@@ -122,13 +128,20 @@
       if (s_blue != blue) { var percent_blue = (Math.abs(blue - s_blue) / 255) * 100; }
       else { var percent_blue = 0.00; }
       var avg = (percent_red + percent_green + percent_blue) / 3;
-      //var score = (15 - difficulty -)
+      var time_taken = date.getTime() - time_begin;
+      var score_red = ((15 - difficulty - percent_red) / (15 - difficulty)) * max_seconds - time_taken,
+          score_green = ((15 - difficulty - percent_green) / (15 - difficulty)) * max_seconds - time_taken,
+          score_blue = ((15 - difficulty - percent_blue) / (15 - difficulty)) * max_seconds - time_taken;
       $("#message").html("Percent Error: " + avg.toFixed(2) + "%<br /><i>R: " + percent_red.toFixed(2) + "%</i> <br /> <i>G: " + percent_green.toFixed(2) + "%</i> <br /> <i>B: " + percent_blue.toFixed(2) + "%</i>");
     }
     var turns = max_turns - turn;
     if (turns > 0) {
-      $("#message").append("<br />Turns Left: " + turns);
-      $("#check").html("Got it!");
+      if (percent_red == 0.00 && percent_green == 0.00 && percent_blue == 0.00) {
+        $("#message").html("Congratulations! You win!");
+      } else {
+        $("#message").append("<br />Turns Left: " + turns);
+        $("#check").html("Got it!");
+      }
     } else {
       $("#message").append("<br />Turns Left: 0");
       $("#check").html("Next Color");
