@@ -24,11 +24,13 @@
   var max_seconds;
   var turn;
   var fs_color;
+  var total_score;
   function setupGame() {
     difficulty = 5;
     max_turns = 10;
-    max_seconds = 20000;
+    max_seconds = 15000;
     turn = 0;
+    total_score = 0;
     var header = '<title>Hexed!</title>';
     header += '<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>';
     header += '<link href="http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,400,300,600" rel="stylesheet" type="text/css" />';
@@ -51,6 +53,8 @@
     setup += '<div id="input_blue"><div class="slider" id="slider_blue"></div>';
     setup += '<div class="in_box"><input type="text" id="blue_in" value="127" /></div></div></div>';
     setup += '<div id="message"></div><button id="check">Got it!</button>';
+    setup += '<div class="scorekeeping" id="overall_score"><h3>Your Score:</h3><div id="overallscorebox">N/A</div></div>';
+    setup += '<div class="scorekeeping" id="last_score"><h3>Score on Last Color:</h3><div id="lastscorebox">N/A</div></div>';
     document.write(setup);
   }
   function generateColor() {
@@ -131,7 +135,8 @@
       var time_taken = date.getTime() - time_begin;
       var score_red = ((15 - difficulty - percent_red) / (15 - difficulty)) * max_seconds - time_taken,
           score_green = ((15 - difficulty - percent_green) / (15 - difficulty)) * max_seconds - time_taken,
-          score_blue = ((15 - difficulty - percent_blue) / (15 - difficulty)) * max_seconds - time_taken;
+          score_blue = ((15 - difficulty - percent_blue) / (15 - difficulty)) * max_seconds - time_taken,
+          score_avg = ((15 - difficulty - avg) / (15 - difficulty)) * max_seconds - time_taken;
       $("#message").html("Percent Error: " + avg.toFixed(2) + "%<br /><i>R: " + percent_red.toFixed(2) + "%</i> <br /> <i>G: " + percent_green.toFixed(2) + "%</i> <br /> <i>B: " + percent_blue.toFixed(2) + "%</i>");
     }
     var turns = max_turns - turn;
@@ -144,6 +149,12 @@
       }
     } else {
       $("#message").append("<br />Turns Left: 0");
+      if (score_avg < 0) {
+        score_avg = 0;
+      }
+      total_score += score_avg;
+      $("#overallscorebox").html(total_score);
+      $("#lastscorebox").html(score_avg);
       $("#check").html("Next Color");
     }
   });
