@@ -20,6 +20,8 @@ input {
   display:block;
 }
 
+input.wide { width: 100%; }
+
 .slider {
   float:left;
   clear:left;

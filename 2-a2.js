@@ -27,9 +27,13 @@ $.fn.hexed = function(settings) {
       max_seconds = 15000,
       turn        = 0,
       total_score = 0,
+      date,
+      time_begin,
       // Color mixings
       letters = '0123456789ABCDEF',
-      fs_color;
+      fs_color,
+      // Extra credit
+      game_on = true;
   
   // Creates an input container for getInitialHTML based on a particular color
   function getInputContainer(color) {
@@ -130,7 +134,6 @@ $.fn.hexed = function(settings) {
     $("#green_in").attr("value", g);
     $("#blue_in").attr("value", b);
     $("#second_swatch").css("background-color", color);
-    console.log("Setting it to", color);
   }
   
   // Calculates the expected difference between two values
@@ -140,14 +143,29 @@ $.fn.hexed = function(settings) {
   
   // Calculates a score given difficulty, percent, and time
   function getScoreCalc(difficulty, percent, time) {
-    return ((15 - difficulty - percent) / (15 - difficulty)) * max_seconds - time;
+    return Math.abs(((15 - difficulty - percent) / (15 - difficulty)) * max_seconds - time);
+  }
+  
+  // Gets the string to display a percent score in #message
+  function getScoreMessage(pre, amount, noit) {
+    return "<strong>" + pre + "</strong>: " + amount.toFixed(2) + "%" + (noit ? "<em>" : "") + (noit ? "</em>" : "") + "<br />\n";
   }
   
   // Input guesser function
   function setCheck() {
     $("#check").click(function(){
+      // If there isn't a game, save stats
+      if(!game_on) {
+        $("#lastscorebox").html($("#overallscorebox").html());
+        localScoreSave($("#namesave")[0].value, difficulty, max_turns, total_score);
+        $("#overallscorebox").text("N/A");
+        $("#check").text("Got it!");
+      }
+      game_on = true;
+      
       // If the game isn't over yet, make a guess
-      if(turn++ < max_turns) {
+      if(turn < max_turns) {
+        ++turn;
             // Guessed amounts
         var red = parseInt(fs_color.substr(1,2),16),
             green = parseInt(fs_color.substr(3,2),16),
@@ -160,38 +178,55 @@ $.fn.hexed = function(settings) {
             percent_red = getPercentOff(s_red, red),
             percent_green = getPercentOff(s_green, green),
             percent_blue = getPercentOff(s_blue, blue),
-            avg = (percent_red + percent_green + percent_blue) / 3;
-            time_taken = date.getTime() - time_begin,
+            avg = (percent_red + percent_green + percent_blue) / 3,
+            time_taken = new Date() .getTime() - time_begin,
+            // Calculated scores
             score_red = getScoreCalc(difficulty, percent_red, time_taken),
             score_green = getScoreCalc(difficulty, percent_green, time_taken),
             score_blue = getScoreCalc(difficulty, percent_blue, time_taken),
-            score_avg = ((15 - difficulty - avg) / (15 - difficulty)) * max_seconds - time_taken;
-        $("#message").html("Percent Error: " + avg.toFixed(2) + "%<br /><i>R: " + percent_red.toFixed(2) + "%</i> <br /> <i>G: " + percent_green.toFixed(2) + "%</i> <br /> <i>B: " + percent_blue.toFixed(2) + "%</i>");
+            score_avg = (score_red + score_green + score_blue) / 3;
+        // Now that the scores have been calculated, put them in the message box
+        $("#message").html("Percent Error: " + avg.toFixed(2) + "%<br />\n" + 
+                           getScoreMessage("R", percent_red) +
+                           getScoreMessage("G", percent_green) +
+                           getScoreMessage("B", percent_blue));
       }
+      // Otherwise the game has finished, reset
       else {
         turn = 0;
         turns = max_turns;
         fs_color = generateColor();
         refreshValues();
         $("#message").html("");
+        // Let the user know what the scores are
+        $("#overallscorebox").html(score_total);
       }
+      
+      // Inform the user how many turns are left
       var turns = max_turns - turn;
-      if (turns > 0) {
-        if (percent_red == 0.00 && percent_green == 0.00 && percent_blue == 0.00) {
+      // If there actually are turns, inform about the game state
+      if(turns > 0) {
+        // If they've gotten it exactly, they've won!
+        if (percent_red == 0.00 && percent_green == 0.00 && percent_blue == 0.00)
           $("#message").html("Congratulations! You win!");
-        } else {
+        // Otherwise let them know to keep going
+        else {
           $("#message").append("<br />Turns Left: " + turns);
           $("#check").html("Got it!");
         }
-      } else {
-        $("#message").append("<br />Turns Left: 0");
-        if (score_avg < 0) {
+      }
+      // Otherwise there's nothing left.
+      else {
+        $("#message").append("<br />No turns left.");
+        // Make sure the score average is positive (why?)
+        if (score_avg < 0)
           score_avg = 0;
-        }
         total_score += score_avg;
-        $("#overallscorebox").html(total_score);
-        $("#lastscorebox").html(score_avg);
-        $("#check").html("Next Color");
+        // Switch over the visual displays
+        $("#overallscorebox").html(score_avg);
+        // Give the user a save form
+        giveUserSaveForm();
+        game_on = false;
       }
     });
   }
@@ -213,11 +248,62 @@ $.fn.hexed = function(settings) {
   setTextInputs();
   
   // 5. Start the time
-  var date = new Date();
-  var time_begin = date.getTime();
+  date = new Date();
+  time_begin = date.getTime();
   
   // 6. Allow the user to start guessing
   setCheck();
+  
+  
+  /* Extra Credit
+  */
+  
+  function giveUserSaveForm() {
+    // Let the clicker know this is being saved
+    game_on = false;
+    $("#message").html(
+      "<div>What's your name?</div>\n" +
+      "<input id='namesave' type='text' class='wide' value='Anonymous' />"
+    );
+    $("#check").text("Save!");
+  }
+  
+  // Grabs the old scores from storage
+  function localScoreRetrieve(scores) {
+    return JSON.parse(localStorage.hexed);
+  }
+
+  // Adds a new score to the old ones
+  function localScoreSave(name, difficulty, turns, score) {
+    console.log(arguments);
+    var scores,
+        adder = {
+            name: name,
+            difficulty: difficulty,
+            turns: turns,
+            score: score,
+            timestamp: new Date().toString()
+          };
+    
+    // If localStorage.scores is incorrectly formatted, this will throw an error
+    try { scores = localScoreRetrieve(); }
+    catch(ERR) { 
+      console.log("Error", ERR);
+      console.log("Storage", localStorage.hexed);
+      console.log("There is incorrect formatting in the old high scores.");
+      scores = [];
+    }
+    
+    if(!scores) scores = [adder];
+    else scores.push(adder);
+    localStorage.hexed = JSON.stringify(scores);
+  }
+  
+  // Helper function to compare two score objects by score, then by timestamp
+  function scoreSortCompare(a, b) {
+    if(a.score != b.score) return a.score < b.score;
+    else return new Date(a.timestamp) < new Date(b.timestamp);
+  }
 };
 
 $("#tester").hexed();
