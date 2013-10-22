@@ -191,7 +191,7 @@ $.fn.hexed = function(settings) {
                            getScoreMessage("B", percent_blue));
         // Also let the user know what the score is
         total_score += score_avg;
-        $("#overallscorebox").text(total_score)
+        $("#overallscorebox").text(total_score);
         $("#lastscorebox").text(score_avg);
       }
       // Otherwise the game has finished, reset
@@ -307,6 +307,8 @@ $.fn.hexed = function(settings) {
     if(a.score != b.score) return a.score < b.score;
     else return new Date(a.timestamp) < new Date(b.timestamp);
   }
+  
+  return this;
 };
 
 $("#tester").hexed();
