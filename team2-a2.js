@@ -156,7 +156,6 @@ $.fn.hexed = function(settings) {
     $("#check").click(function(){
       // If there isn't a game, save stats
       if(!game_on) {
-        $("#lastscorebox").html($("#overallscorebox").html());
         localScoreSave($("#namesave")[0].value, difficulty, max_turns, total_score);
         $("#overallscorebox").text("N/A");
         $("#check").text("Got it!");
@@ -190,10 +189,14 @@ $.fn.hexed = function(settings) {
                            getScoreMessage("R", percent_red) +
                            getScoreMessage("G", percent_green) +
                            getScoreMessage("B", percent_blue));
+        // Also let the user know what the score is
+        total_score += score_avg;
+        $("#overallscorebox").text(total_score)
+        $("#lastscorebox").text(score_avg);
       }
       // Otherwise the game has finished, reset
       else {
-        turn = 0;
+        turn = total_score = 0;
         turns = max_turns;
         fs_color = generateColor();
         refreshValues();
